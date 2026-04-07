@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!--
+    ===================================================
+    ملف: pages/products.html
+    الصفحة: صفحة المنتجات
+
+    للباك اند:
+    - المنتجات المعروضة حالياً ثابتة (static)
+    - لجعلها ديناميكية، استبدل المحتوى الثابت
+      بطلبات API:
+        GET /api/products          ← جميع المنتجات
+        GET /api/products?category=residential  ← تصفية
+        GET /api/bundles           ← الباقات المتكاملة
+
+    - أزرار "اطلب الآن" يجب أن ترسل لـ:
+        POST /api/orders/initiate  ← بدء طلب شراء
+        Body: { bundle_id: 1, product_id: null }
+
+    - زر "احصل على عرض سعر مجاني" يوجه لنموذج
+      التواصل في صفحة: about.html#contact-section
+    ===================================================
+-->
+<html dir="rtl" lang="ar" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>المنتجات | المشعبة لمنظومات الطاقة الشمسية - حضرموت، اليمن</title>
+    <meta name="description" content="اكتشف مجموعة منتجات المشعبة للطاقة الشمسية: ألواح شمسية، بطاريات تخزين، محولات طاقة. باقات متكاملة للمنازل والمنشآت في المملكة." />
+
+    <!-- للباك اند: <meta name="csrf-token" content="{{ csrf_token() }}"> -->
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=IBM+Plex+Sans+Arabic:wght@100..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind - يجب تحميل الإعدادات أولاً -->
+    <script src="../js/tailwind.config.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- CSS الموقع -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/products.css" />
+</head>
+
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-white">
+
+<!-- ==========================================
+     شريط التنقل
+     (المنتجات رابط نشط هنا)
+     ========================================== -->
+<nav id="main-navbar"
+     class="glass-nav fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 h-20 max-w-7xl mx-auto rounded-full mt-4 md:mx-8"
+     role="navigation" aria-label="التنقل الرئيسي">
+
+    <div class="flex items-center gap-8">
+        <a href="../index.html" class="text-2xl font-black tracking-tighter text-primary" aria-label="الرئيسية">
+            Radiant Solar
+        </a>
+        <nav class="hidden md:flex items-center gap-6" aria-label="قائمة رئيسية">
+            <!-- رابط المنتجات نشط في هذه الصفحة -->
+            <a class="nav-link active" href="products.html" aria-current="page">المنتجات</a>
+            <a class="nav-link" href="calculator.html">حاسبة الطاقة</a>
+            <a class="nav-link" href="about.html">من نحن</a>
+        </nav>
+    </div>
+
+    <button class="btn-consultation px-6 py-2.5 text-sm"
+            onclick="window.location.href='about.html#contact'"
+            id="consultation-btn">
+        احصل على استشارة
+    </button>
+</nav>
+
+
+<!-- ==========================================
+     المحتوى الرئيسي
+     ========================================== -->
+<main class="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+
+    <!-- قسم العنوان -->
+    <header class="mb-16 text-center md:text-right reveal">
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-on-surface mb-6 leading-[1.1]">
+            حلول <span class="text-primary">طاقة ذكية</span> لمستقبل مستدام
+        </h1>
+        <p class="text-lg md:text-xl text-secondary max-w-2xl leading-relaxed">
+            اكتشف مجموعتنا المختارة من أنظمة الطاقة الشمسية المتقدمة
+            المصممة لتحمل المناخ السعودي وتوفير أقصى قدر من الكفاءة.
+        </p>
+    </header>
+
+    <!-- ==========================================
+         أزرار تصفية الفئات
+         للباك اند: عند الضغط على فئة، أرسل طلب:
+                    GET /api/products?category={slug}
+                    ثم أعد رسم قائمة المنتجات
+         ========================================== -->
+    <div class="flex flex-wrap gap-4 mb-12 justify-center md:justify-start" role="group" aria-label="تصفية المنتجات">
+        <button class="filter-btn active"
+                data-category="residential"
+                id="filter-residential"
+                aria-pressed="true">
+            <span class="material-symbols-outlined" aria-hidden="true">home</span>
+            الأنظمة السكنية
+        </button>
+        <button class="filter-btn inactive"
+                data-category="commercial"
+                id="filter-commercial"
+                aria-pressed="false">
+            <span class="material-symbols-outlined" aria-hidden="true">business</span>
+            الأنظمة التجارية
+        </button>
+        <button class="filter-btn inactive"
+                data-category="storage"
+                id="filter-storage"
+                aria-pressed="false">
+            <span class="material-symbols-outlined" aria-hidden="true">battery_charging_full</span>
+            تخزين الطاقة
+        </button>
+    </div>
+
+    <!-- ==========================================
+         شبكة المنتجات الرئيسية (Bento Grid)
+         للباك اند: استبدل المحتوى الثابت بـ:
+                    GET /api/products?featured=true
+         ========================================== -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-24" id="products-grid">
+
+        <!-- المنتج الرئيسي المميز -->
+        <article class="md:col-span-8 product-featured reveal group" aria-label="ألواح Vertex S+ ثنائية الوجه">
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+
+                <!-- نص المنتج -->
+                <div class="flex-1 space-y-6">
+                    <!-- للباك اند: badge_text يأتي من الباك اند -->
+                    <span class="badge-premium">Premium Choice</span>
+                    <h2 class="text-4xl font-bold">ألواح Vertex S+ ثنائية الوجه</h2>
+
+                    <!-- مواصفات المنتج -->
+                    <!-- للباك اند: يجب جلب المواصفات من: GET /api/products/{id}/specs -->
+                    <ul class="product-features-list">
+                        <li>
+                            <span class="material-symbols-outlined text-primary" aria-hidden="true">check_circle</span>
+                            كفاءة تصل إلى 22.5%
+                        </li>
+                        <li>
+                            <span class="material-symbols-outlined text-primary" aria-hidden="true">check_circle</span>
+                            زجاج مزدوج للمتانة في البيئة الصحراوية
+                        </li>
+                        <li>
+                            <span class="material-symbols-outlined text-primary" aria-hidden="true">check_circle</span>
+                            ضمان أداء لمدة 30 عاماً
+                        </li>
+                    </ul>
+
+                    <!-- للباك اند: data-product-id يُستخدم عند إرسال طلب شراء -->
+                    <button class="btn-primary px-10 py-4 rounded-full"
+                            data-product-id="vertex-s-plus"
+                            id="btn-vertex-details">
+                        تفاصيل المنتج
+                    </button>
+                </div>
+
+                <!-- صورة المنتج -->
+                <div class="product-featured-image flex-1">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy5eaOCJI3G4KDe1Os6KhHRxBk8fw7z7y67EPEMZMeUiD9VnmH6VSknb6NeaztSjFfEOkSbYQrCJmrb2_xCjb1d0S55BqDwzxsKVqV7Fmrx7UOhhtDcTHGW3YrEPkGCsMLMMUbSFsGat5tQtKzm2_odjKMnOeZjFl7Zx20S7f_IETxWexnk78JZHQuqS9wPLjd2Bg7dHoBGcvOJHfRRqNyQSXTwpCQW-BTtFUKnxp_mSXQfX6qNdFiX67stnV7TF3ItLPF01GRIR4"
+                         alt="لوح شمسي ثنائي الوجه من نوع Vertex S+ بنية بلورية عالية الدقة" />
+                </div>
+            </div>
+        </article>
+
+        <!-- منتج جانبي 1: المحول -->
+        <article class="md:col-span-4 product-side-card reveal group" data-product-id="sunways-hybrid" aria-label="محول الطاقة SunWays Hybrid">
+            <div class="product-side-image">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAut_U5rdx16X9eFkIWGXLE9CGqnMuVK8lPHCUhEEK8_7VNcRWfX_AAhM0j3kc752tMhhlKy8oxd3juBqCIaPlqZKZJ2FeuBHgwgb3D0PpXwXdqXI1T4hpZRl4IaCpLprF4wEIyf8bTyTZ7QeOf2GNiKJ5rJisPyY2a-6qVoyifgrb6xgIJJ2rKYPQt2HXkibOEcYdRqtvGb8SvEi43GAO6c5_TchJjtNyQhWfk7_pz9fAEBUA-qyl5tYWSkdwfOCvMQWiurRfZLHw"
+                     alt="محول طاقة هجين SunWays مثبت على جدار مرآب حديث" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-2">محول الطاقة SunWays Hybrid</h3>
+                <p class="text-secondary mb-6">تحكم ذكي في الطاقة وتوافق كامل مع البطاريات.</p>
+                <div class="flex items-center justify-between">
+                    <!-- للباك اند: السعر من GET /api/products/{id} -->
+                    <span class="product-price">5,499 ر.س</span>
+                    <span class="material-symbols-outlined text-slate-300" aria-hidden="true">arrow_back_ios</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- منتج 2: البطارية -->
+        <article class="md:col-span-4 product-side-card reveal group" data-product-id="luna2000" aria-label="بطارية Luna2000 الذكية">
+            <div class="product-side-image">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBnkG1-z-GbMnRtdxFlA_JrIvx9uK03iB26L_a1Ez3XILb9LTXQbOrmdFX8oN9AKD8VG8TgdhFGB0XfoM5K0NUQ0yZGRoaytBSmU2YwAt6erUUps8hqpzYxXzxSILO4rJD8VaGI6olya1fSeWTLz8T2mQHpSvveOTQh1BEb0buZ9O-YNh61fC4Mava6WbIu3OTZjiV4G1-wQ2BZxQ49YEkFUfhI_uZFdHMon_zhrRCWwkroWfhPjuUq64OcUAm6T43-cQdMFU4GIc"
+                     alt="وحدة بطارية ليثيوم ذكية Luna2000 للطاقة الشمسية" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-2">بطارية Luna2000 الذكية</h3>
+                <p class="text-secondary mb-6">سعة تخزين مرنة تبدأ من 5 كيلو واط ساعة.</p>
+                <div class="flex items-center justify-between">
+                    <span class="product-price">12,900 ر.س</span>
+                    <span class="material-symbols-outlined text-slate-300" aria-hidden="true">arrow_back_ios</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- منتج 3: هياكل التثبيت -->
+        <article class="md:col-span-4 product-side-card reveal group" data-product-id="al-pro-mounting" aria-label="هياكل تثبيت AL-Pro">
+            <div class="product-side-image">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg7OZKIRCGkAGw0UihKAypHqo3BQoThmyYc2NSV4PCONXHuurikRZfUgqXaivULWdk8e1bJVBbSEjSSs_N_7vYf2b9YgvaGic7VcmDwBqS-YZhDPcBdztGgDrehEm7jFcqmni50QnSiGjcqn7kK9vZAKTeKzefwkV5sc9kqkAQVqheZrb1b7JqDaxK7anuExnLZf73EaE_Mtltuoquyptl5TdOabZrAk7K1yD8IBWMMJBkdcz5hCQVF7LUag3EvA6kFqAeGZ0c4qI"
+                     alt="هياكل تثبيت ألمنيوم عالي الجودة على سطح في وضح الشمس" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-2">هياكل تثبيت AL-Pro</h3>
+                <p class="text-secondary mb-6">ألمنيوم عالي الجودة مقاوم للتآكل والصدأ.</p>
+                <div class="flex items-center justify-between">
+                    <span class="product-price">1,200 ر.س</span>
+                    <span class="material-symbols-outlined text-slate-300" aria-hidden="true">arrow_back_ios</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- منتج 4: نظام المراقبة -->
+        <article class="md:col-span-4 product-side-card reveal group" data-product-id="radiant-monitor" aria-label="نظام المراقبة Radiant">
+            <div class="product-side-image">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcDrtIVoObty7XTvMLllTXum_Scr3ew1kTi8wDzpPUxbP7GOK-y7rpImpJKEDWyey-fdT37J4jGb8RxAlNJxiK6LERns_ZQ4vrQH0egnu1yOJF4Qwiup1MVpnhRFwjjzqUs5Hg3o2eANTvUN9WirWJ_Uxmwdkefrlqb3vqsGowCATXDNJEuPI41-jpmU43XT3DRJbBAxGF8xj38r26JrFI_nyWN6i3-INuh86tqIOXG0SThl0Fjm3nQ4J6Y5QJQqmzObuSWLiIZU"
+                     alt="تطبيق مراقبة ذكي يعرض إحصائيات الطاقة على شاشة لوحية" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold mb-2">نظام المراقبة Radiant</h3>
+                <p class="text-secondary mb-6">تطبيق جوال متقدم لمتابعة الإنتاج والتحكم بالاستهلاك.</p>
+                <div class="flex items-center justify-between">
+                    <span class="product-price text-tertiary">مجاناً مع الأنظمة</span>
+                    <span class="material-symbols-outlined text-slate-300" aria-hidden="true">arrow_back_ios</span>
+                </div>
+            </div>
+        </article>
+
+    </div>
+
+
+    <!-- ==========================================
+         قسم الباقات المتكاملة (Bundles)
+         للباك اند: البيانات من GET /api/bundles
+                    أزرار "اطلب الآن" ترسل:
+                    POST /api/orders/initiate { bundle_id }
+         ========================================== -->
+    <section class="bundles-section" aria-labelledby="bundles-heading">
+
+        <div class="text-center mb-16 reveal">
+            <h2 id="bundles-heading" class="text-4xl font-extrabold mb-4">باقات الحلول المتكاملة</h2>
+            <p class="text-secondary">وفّر أكثر مع مجموعاتنا المصممة خصيصاً لاحتياجاتك</p>
+        </div>
+
+        <div class="bundles-grid">
+
+            <!-- الباقة الأساسية -->
+            <!-- للباك اند: data-bundle-id يُرسل عند الطلب -->
+            <article class="bundle-card bundle-card-basic reveal" data-bundle-id="1" aria-label="الباقة الأساسية">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold mb-2">الباقة الأساسية</h3>
+                    <p class="text-secondary text-sm">مثالية للمنازل الصغيرة</p>
+                </div>
+                <!-- للباك اند: السعر من البيانات الديناميكية -->
+                <div class="bundle-price">18,500 <span class="text-lg font-medium text-secondary">ر.س</span></div>
+                <ul class="bundle-features">
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">bolt</span> نظام 5 كيلو واط</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">grid_view</span> 10 ألواح شمسية</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">settings</span> محول طاقة أحادي</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">construction</span> التركيب والتدشين</li>
+                </ul>
+                <button class="bundle-btn-outline" id="btn-bundle-basic">اطلب الآن</button>
+            </article>
+
+            <!-- الباقة المتكاملة (الأكثر مبيعاً) -->
+            <article class="bundle-card bundle-card-featured reveal" data-bundle-id="2" aria-label="الباقة المتكاملة - الأكثر مبيعاً" style="animation-delay:0.1s">
+                <div class="bundle-best-badge" aria-label="الأكثر مبيعاً">الأكثر مبيعاً</div>
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold mb-2">الباقة المتكاملة</h3>
+                    <p class="text-secondary text-sm">للفلل والبيوت الكبيرة</p>
+                </div>
+                <div class="bundle-price">42,000 <span class="text-lg font-medium text-secondary">ر.س</span></div>
+                <ul class="bundle-features">
+                    <li class="font-bold"><span class="material-symbols-outlined text-primary" aria-hidden="true">bolt</span> نظام 10 كيلو واط</li>
+                    <li><span class="material-symbols-outlined text-primary" aria-hidden="true">grid_view</span> 20 لوح شمسي عالي الكفاءة</li>
+                    <li><span class="material-symbols-outlined text-primary" aria-hidden="true">battery_saver</span> بطارية تخزين 10 كيلو واط</li>
+                    <li><span class="material-symbols-outlined text-primary" aria-hidden="true">settings</span> محول طاقة هجين</li>
+                    <li><span class="material-symbols-outlined text-primary" aria-hidden="true">verified</span> ضمان ذهبي لمدة 10 سنوات</li>
+                </ul>
+                <button class="bundle-btn-primary" id="btn-bundle-featured">اطلب الآن</button>
+            </article>
+
+            <!-- باقة المنشآت -->
+            <article class="bundle-card bundle-card-commercial reveal" data-bundle-id="3" aria-label="باقة المنشآت" style="animation-delay:0.2s">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold mb-2">باقة المنشآت</h3>
+                    <p class="text-secondary text-sm">للمصانع والمستودعات</p>
+                </div>
+                <div class="bundle-price">115,000 <span class="text-lg font-medium text-secondary">ر.س</span></div>
+                <ul class="bundle-features">
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">bolt</span> نظام 30+ كيلو واط</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">grid_view</span> ألواح ثنائية الوجه</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">monitoring</span> مركز تحكم ذكي</li>
+                    <li><span class="material-symbols-outlined text-tertiary" aria-hidden="true">engineering</span> دعم فني 24/7</li>
+                </ul>
+                <button class="bundle-btn-outline" id="btn-bundle-commercial">استشارة تجارية</button>
+            </article>
+
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+         قسم CTA الختامي
+         ========================================== -->
+    <section class="products-cta-section reveal" aria-labelledby="products-cta-heading">
+        <div class="absolute inset-0 -z-10" aria-hidden="true"></div>
+
+        <h2 id="products-cta-heading" class="text-4xl font-bold mb-6 relative z-10">
+            هل أنت جاهز للتحول نحو الطاقة الشمسية؟
+        </h2>
+        <p class="text-xl mb-10 opacity-90 relative z-10">
+            فريقنا جاهز لدراسة منزلك وتقديم عرض سعر مجاني مخصص لك.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6 relative z-10">
+            <button class="px-10 py-4 bg-white text-primary rounded-full font-black text-lg hover:shadow-2xl transition-all active:scale-95"
+                    onclick="window.location.href='about.html#contact'"
+                    id="btn-free-quote">
+                احصل على عرض سعر مجاني
+            </button>
+            <button class="px-10 py-4 bg-white/10 text-white border-2 border-white/20 rounded-full font-bold hover:bg-white/20 transition-all"
+                    onclick="window.location.href='calculator.html'"
+                    id="btn-talk-expert">
+                تحدث مع خبير
+            </button>
+        </div>
+    </section>
+
+</main>
+
+
+<!-- ==========================================
+     الفوتر
+     ========================================== -->
+<footer class="site-footer" role="contentinfo">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex flex-col gap-2">
+            <span class="text-xl font-bold text-slate-900">المشعبة لمنظومات الطاقة الشمسية</span>
+            <p class="text-slate-500 text-sm">© 2024 المشعبة - اليمن، حضرموت، المكلا. دقة في كل شعاع.</p>
+        </div>
+        <nav class="flex gap-8 text-slate-500 font-medium" aria-label="روابط ثانوية">
+            <a href="#" class="hover:text-primary transition-colors">الخصوصية</a>
+            <a href="#" class="hover:text-primary transition-colors">الشروط</a>
+            <a href="#" class="hover:text-primary transition-colors">الاستدامة</a>
+        </nav>
+        <div class="flex gap-4" aria-label="وسائل التواصل">
+            <a href="#" class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center hover:bg-primary transition-colors hover:text-white" aria-label="مشاركة">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">language</span>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center hover:bg-primary transition-colors hover:text-white" aria-label="التواصل">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">share</span>
+            </a>
+        </div>
+    </div>
+</footer>
+
+
+<!-- JavaScript -->
+<script src="../js/main.js"></script>
+<!-- للباك اند: أضف هنا ملف JS خاص بالمنتجات إذا احتجت لمنطق إضافي -->
+<script>
+    /**
+     * للباك اند: منطق تصفية المنتجات
+     * عند الضغط على زر الفئة، أرسل طلب API:
+     * GET /api/products?category={slug}
+     * ثم أعد رسم القائمة بالبيانات الجديدة
+     */
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            // إزالة النشاط من جميع الأزرار
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('inactive');
+                b.setAttribute('aria-pressed', 'false');
+            });
+
+            // تفعيل الزر المضغوط
+            this.classList.add('active');
+            this.classList.remove('inactive');
+            this.setAttribute('aria-pressed', 'true');
+
+            const category = this.dataset.category;
+
+            /**
+             * للباك اند: أزل التعليق وأضف رابط API الحقيقي:
+             *
+             * RadiantSolar.apiRequest('/api/products?category=' + category)
+             *     .then(function(data) {
+             *         renderProducts(data.products);
+             *     })
+             *     .catch(function(err) {
+             *         console.error('خطأ في جلب المنتجات:', err);
+             *     });
+             */
+            console.log('تصفية المنتجات بالفئة:', category);
+        });
+    });
+
+    /**
+     * للباك اند: أزرار طلب الباقات
+     * POST /api/orders/initiate { bundle_id }
+     */
+    document.querySelectorAll('[data-bundle-id]').forEach(function(card) {
+        const btn = card.querySelector('button');
+        if (btn) {
+            btn.addEventListener('click', function() {
+                const bundleId = card.dataset.bundleId;
+                /**
+                 * للباك اند: أرسل طلب الشراء:
+                 *
+                 * RadiantSolar.apiRequest('/api/orders/initiate', 'POST', { bundle_id: bundleId })
+                 *     .then(function(data) {
+                 *         window.location.href = data.checkout_url;
+                 *     });
+                 */
+                console.log('طلب الباقة رقم:', bundleId);
+                // حالياً: توجيه لصفحة التواصل
+                window.location.href = 'about.html#contact';
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!--
+    ===================================================
+    ملف: pages/calculator.html
+    الصفحة: حاسبة الطاقة الذكية
+
+    للباك اند:
+    - هذه الصفحة هي الأهم في الموقع تقنياً
+    - الحاسبة تعمل بالكامل على الفرونت اند حالياً
+    - لربطها بالباك اند، عدّل calculator.js:
+
+    نقاط API المطلوبة:
+    ┌─────────────────────────────────────────────┐
+    │ GET  /api/appliances                         │
+    │   ← جلب قائمة الأجهزة مع استهلاك كل منها   │
+    │   الاستجابة: [{id, name, watt, icon}, ...]  │
+    │                                              │
+    │ GET  /api/regions                            │
+    │   ← جلب المناطق مع معامل الإشعاع الشمسي    │
+    │   الاستجابة: [{id, name, solar_hours}, ...] │
+    │                                              │
+    │ POST /api/calculate                          │
+    │   ← حساب احتياجات الطاقة                    │
+    │   البيانات: {appliances: [{id, qty}],        │
+    │              hours, region_id}               │
+    │   الاستجابة: {panels, batteries,             │
+    │               daily_kwh, monthly_savings,    │
+    │               recommended_products: [...]}   │
+    └─────────────────────────────────────────────┘
+    ===================================================
+-->
+<html dir="rtl" lang="ar" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>حاسبة الطاقة | المشعبة لمنظومات الطاقة الشمسية - حضرموت، اليمن</title>
+    <meta name="description" content="احسب احتياجاتك من الطاقة الشمسية بدقة. حدد أجهزتك المنزلية واكتشف النظام الأمثل لمنزلك مع حاسبة المشعبة الذكية." />
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=IBM+Plex+Sans+Arabic:wght@100..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="../js/tailwind.config.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/calculator.css" />
+</head>
+
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-white">
+
+<!-- ==========================================
+     شريط التنقل
+     (حاسبة الطاقة رابط نشط)
+     ========================================== -->
+<header id="main-navbar"
+        class="glass-nav fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 h-20 max-w-7xl mx-auto rounded-full mt-4 md:mx-8 font-['IBM_Plex_Sans_Arabic'] text-sm tracking-tight"
+        role="banner">
+
+    <a class="text-2xl font-black tracking-tighter text-primary" href="../index.html" aria-label="الرئيسية - Radiant Solar">
+        Radiant Solar
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="قائمة رئيسية">
+        <a class="nav-link" href="products.html">المنتجات</a>
+        <!-- حاسبة الطاقة نشطة في هذه الصفحة -->
+        <a class="nav-link active" href="calculator.html" aria-current="page">حاسبة الطاقة</a>
+        <a class="nav-link" href="about.html">من نحن</a>
+    </nav>
+
+    <button class="btn-consultation px-6 py-2.5"
+            onclick="window.location.href='about.html#contact'"
+            id="consultation-btn">
+        احصل على استشارة
+    </button>
+</header>
+
+
+<!-- ==========================================
+     المحتوى الرئيسي
+     ========================================== -->
+<main class="pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto">
+
+    <!-- عنوان الصفحة -->
+    <section class="mb-16 text-center md:text-right reveal" aria-labelledby="calc-page-title">
+        <h1 id="calc-page-title" class="text-4xl md:text-6xl font-bold text-on-surface mb-6 tracking-tight leading-tight">
+            حاسبة الطاقة الذكية
+        </h1>
+        <p class="text-lg md:text-xl text-secondary max-w-2xl leading-relaxed">
+            حدد أجهزتك المنزلية واكتشف احتياجك الفعلي من الطاقة الشمسية
+            بدقة المشعبة العالية.
+        </p>
+    </section>
+
+    <!-- ==========================================
+         الشبكة الرئيسية: عمودان
+         اليمين: اختيار الأجهزة والإدخالات
+         اليسار: النتائج والتوصيات
+         ========================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- ==========================================
+             العمود الأيمن: الإدخالات
+             ========================================== -->
+        <div class="lg:col-span-8 space-y-8">
+
+            <!-- ==========================================
+                 بطاقة اختيار الأجهزة المنزلية
+                 للباك اند: الأجهزة se تُجلب ديناميكياً
+                            ويُدار عدد كل منها بـ calculator.js
+                 ========================================== -->
+            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm reveal">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold">اختر الأجهزة المنزلية</h2>
+                    <span class="text-secondary text-sm">حدد العدد التقريبي لكل جهاز</span>
+                </div>
+
+                <!--
+                    شبكة بطاقات الأجهزة
+                    للباك اند: هذه البطاقات تُنشأ ديناميكياً بـ calculator.js
+                               من APPLIANCES array أو GET /api/appliances
+                -->
+                <div id="appliances-grid"
+                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"
+                     role="group"
+                     aria-label="اختيار الأجهزة المنزلية">
+                    <!--
+                        البطاقات تُضاف ديناميكياً بـ JavaScript (calculator.js)
+                        انظر: دالة initAppliances()
+                    -->
+
+                    <!-- بطاقة إضافة جهاز مخصص (ثابتة) -->
+                    <button class="appliance-card-add rounded-lg"
+                            id="btn-add-custom-appliance"
+                            aria-label="إضافة جهاز مخصص"
+                            onclick="alert('سيتم إضافة هذه الميزة قريباً')">
+                        <span class="material-symbols-outlined text-slate-400 text-3xl mb-2" aria-hidden="true">add</span>
+                        <span class="block text-slate-500 font-medium text-sm">جهاز إضافي</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 بطاقات الإدخالات الإضافية (بينتو صغير)
+                 ========================================== -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- ساعات التشغيل اليومية -->
+                <div class="bg-surface-container-low p-8 rounded-xl reveal">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" aria-hidden="true">history</span>
+                        متوسط ساعات التشغيل
+                    </h3>
+
+                    <!-- شريط التمرير للساعات -->
+                    <input type="range"
+                           id="hours-slider"
+                           class="range-slider mb-4"
+                           min="4" max="24" step="1" value="8"
+                           aria-label="ساعات التشغيل اليومية"
+                           aria-valuemin="4"
+                           aria-valuemax="24"
+                           aria-valuenow="8" />
+
+                    <div class="flex justify-between text-sm font-medium">
+                        <span>4 ساعات</span>
+                        <!-- هذا الرقم يُحدَّث بـ calculator.js -->
+                        <span class="text-primary text-lg font-bold" id="hours-display">8 ساعات يومياً</span>
+                        <span>24 ساعة</span>
+                    </div>
+                </div>
+
+                <!-- المنطقة الجغرافية -->
+                <div class="bg-surface-container-low p-8 rounded-xl reveal" style="animation-delay:0.1s">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-tertiary" aria-hidden="true">location_on</span>
+                        المنطقة الجغرافية
+                    </h3>
+
+                    <!--
+                        للباك اند: الخيارات تُجلب من:
+                                   GET /api/regions
+                                   [{id, name, solar_hours}]
+                    -->
+                    <select id="region-select"
+                            class="w-full bg-surface-container-lowest border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-primary/40 font-body"
+                            aria-label="اختر منطقتك الجغرافية">
+                        <option value="riyadh">الرياض - إشعاع مرتفع</option>
+                        <option value="jeddah">جدة - إشعاع متوسط</option>
+                        <option value="abha">أبها - إشعاع متنوع</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ==========================================
+             العمود الأيسر: النتائج والتوصيات
+             للباك اند: هذه البيانات تُحدَّث في الوقت الفعلي
+                        بـ calculator.js عند كل تغيير في الإدخالات
+             ========================================== -->
+        <div class="lg:col-span-4 space-y-8">
+
+            <!-- بطاقة تحليل الاستهلاك (النتائج) -->
+            <div class="results-card sticky top-24 reveal" role="region" aria-label="نتائج تحليل الاستهلاك" aria-live="polite">
+
+                <h2 class="text-2xl font-bold mb-8 relative z-10">تحليل الاستهلاك</h2>
+
+                <div class="space-y-6 relative z-10">
+
+                    <!-- الحمل الكلي -->
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-lg">الحمل الكلي</span>
+                            <!-- للباك اند: هذا الرقم يُحدَّث بـ calculator.js -->
+                            <span id="result-load-kw" class="text-primary font-black text-xl" aria-live="polite">0 kW</span>
+                        </div>
+
+                        <!-- شريط الحمل البياني -->
+                        <div class="load-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                            <div id="load-bar-fill" class="load-bar-fill" style="width: 0%"></div>
+                        </div>
+
+                        <!-- نص التوصية -->
+                        <p id="consumption-description" class="text-sm text-secondary mt-2" aria-live="polite">
+                            أضف الأجهزة لبدء الحساب
+                        </p>
+                    </div>
+
+                    <!-- الاستهلاك اليومي + الشبكة الصغيرة -->
+                    <div class="pt-6 border-t border-white/20">
+                        <!-- الاستهلاك اليومي -->
+                        <div class="flex justify-between mb-4">
+                            <span class="font-bold">الاستهلاك اليومي</span>
+                            <span id="result-daily-kwh" class="text-primary font-bold" aria-live="polite">0 kWh</span>
+                        </div>
+
+                        <!-- نتائج صغيرة: الألواح والبطاريات -->
+                        <div class="results-mini-grid">
+                            <div class="results-mini-card">
+                                <span class="text-sm text-secondary block mb-1">عدد الألواح</span>
+                                <!-- للباك اند: هذا الرقم يأتي من POST /api/calculate -->
+                                <span id="result-panels" class="results-big-number" aria-live="polite">0</span>
+                            </div>
+                            <div class="results-mini-card">
+                                <span class="text-sm text-secondary block mb-1">البطاريات</span>
+                                <!-- للباك اند: هذا الرقم يأتي من POST /api/calculate -->
+                                <span id="result-batteries" class="results-big-number" aria-live="polite">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 بطاقات الاقتراحات الذكية
+                 للباك اند: هذه الاقتراحات تأتي من:
+                            GET /api/products/recommend?kwh={X}
+                            أو من نتائج POST /api/calculate
+                 ========================================== -->
+            <div class="space-y-4 reveal" style="animation-delay:0.2s">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary" aria-hidden="true">auto_awesome</span>
+                    اقتراحات ذكية
+                </h3>
+
+                <!-- الاقتراح الرئيسي: BEST FIT -->
+                <!-- للباك اند: product_id يُستخدم لفتح صفحة المنتج -->
+                <div class="suggestion-card" data-product-id="radiant-prime">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="badge badge-primary text-xs px-3 py-1">BEST FIT</span>
+                        <!-- للباك اند: السعر من GET /api/products/{id} -->
+                        <span class="text-primary font-bold">SAR 12,500</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">نظام Radiant Prime السكني</h4>
+                    <p class="text-sm text-secondary mb-4">
+                        مثالي لفلل 4 غرف مع تشغيل مكيفين على مدار الساعة.
+                    </p>
+                    <a href="products.html"
+                       class="suggestion-primary-btn"
+                       id="btn-prime-details">
+                        تفاصيل النظام
+                    </a>
+                </div>
+
+                <!-- الاقتراح الثانوي: PREMIUM -->
+                <div class="suggestion-card-secondary" data-product-id="radiant-elite">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="badge badge-success text-xs px-3 py-1">PREMIUM</span>
+                        <span class="text-primary font-bold">SAR 24,000</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">نظام Radiant Elite المتكامل</h4>
+                    <p class="text-sm text-secondary mb-4">
+                        طاقة غير منقطعة مع بطاريات ليثيوم عالية السعة ونظام تحكم ذكي.
+                    </p>
+                    <a href="products.html"
+                       class="suggestion-secondary-btn"
+                       id="btn-elite-compare">
+                        قارن الأنظمة
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+
+<!-- ==========================================
+     قسم التحليل المرئي التفصيلي
+     ========================================== -->
+<section class="analysis-visual-section" aria-labelledby="analysis-heading">
+    <div class="max-w-7xl mx-auto px-6 md:px-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            <!-- الصورة التحليلية -->
+            <div class="order-2 lg:order-1 reveal">
+                <div class="analysis-image-frame aspect-video">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNpgBcbeEF37Jed2vVAZlMK0IwGr7YE3Zn2mtPNzX7q8F7BQtMs4tclXu3cwUJl98BdumoOG0qotlYkPXd0Zpormu-IIIJ6-9HF0riKLdrxDEE7QRABsuSawtBaxLwEjRDhponV6tNJOcxQrLFhoiI798zU9XFNt69IGXu39Jsx8ZgMOCN8hgi0p2JbmBTspCy_lC3m4_dnFg_ESOlNEmHys4OW8ZX-MLZl7xrw9za3lBAPAo8sveChgzhES0zBx88shhJdg2tt6Y"
+                         alt="لوحة تحكم تحليلية تعرض بيانات إنتاج واستهلاك الطاقة الشمسية" />
+                </div>
+            </div>
+
+            <!-- النص التفسيري -->
+            <div class="order-1 lg:order-2 reveal" style="animation-delay:0.1s">
+                <h2 id="analysis-heading" class="text-4xl font-bold mb-6 leading-tight">
+                    تحليل دقيق، ليس مجرد أرقام
+                </h2>
+                <p class="text-lg text-secondary mb-8 leading-relaxed">
+                    تستخدم المشعبة خوارزميات متقدمة لحساب زاوية الشمس وتوزيع الظلال
+                    بناءً على موقعك الجغرافي، مما يضمن لك كفاءة تصل إلى 98% في
+                    جميع الظروف الجوية.
+                </p>
+
+                <!-- قائمة المزايا -->
+                <ul class="space-y-4">
+                    <li class="analysis-feature">
+                        <span class="analysis-feature-icon material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        <span class="font-bold">توفير يصل إلى 60% من فاتورة الكهرباء</span>
+                    </li>
+                    <li class="analysis-feature">
+                        <span class="analysis-feature-icon material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        <span class="font-bold">ضمان أداء لمدة 25 سنة على الألواح</span>
+                    </li>
+                    <li class="analysis-feature">
+                        <span class="analysis-feature-icon material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        <span class="font-bold">دعم فني وصيانة دورية مجانية</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ==========================================
+     الفوتر
+     ========================================== -->
+<footer class="site-footer" role="contentinfo">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="text-xl font-bold text-slate-900">Radiant Solar</div>
+        <div class="text-slate-500 text-sm">© 2024 Radiant Solar. دقة في كل شعاع.</div>
+        <nav class="flex gap-6" aria-label="روابط ثانوية">
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors">الخصوصية</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors">الشروط</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors">الاستدامة</a>
+        </nav>
+    </div>
+</footer>
+
+
+<!-- ==========================================
+     النافبار السفلي للهاتف
+     يُعرض فقط على الشاشات الصغيرة
+     ========================================== -->
+<div class="mobile-bottom-nav" role="navigation" aria-label="تنقل الهاتف">
+    <div class="mobile-bottom-nav-inner">
+        <button class="mobile-nav-btn"
+                onclick="window.location.href='../index.html'"
+                aria-label="الرئيسية">
+            <span class="material-symbols-outlined" aria-hidden="true">home</span>
+            <span>الرئيسية</span>
+        </button>
+
+        <button class="mobile-nav-btn active"
+                onclick="window.location.href='calculator.html'"
+                aria-label="الحاسبة"
+                aria-current="page">
+            <span class="material-symbols-outlined filled" style="font-variation-settings:'FILL' 1" aria-hidden="true">calculate</span>
+            <span>الحاسبة</span>
+        </button>
+
+        <button class="mobile-nav-btn"
+                onclick="window.location.href='products.html'"
+                aria-label="المنتجات">
+            <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+            <span>المنتجات</span>
+        </button>
+
+        <button class="mobile-nav-btn"
+                onclick="window.location.href='about.html'"
+                aria-label="من نحن">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+            <span>عنّا</span>
+        </button>
+    </div>
+</div>
+
+
+<!-- JavaScript -->
+<script src="../js/main.js"></script>
+<!-- منطق الحاسبة - الملف الرئيسي لهذه الصفحة -->
+<script src="../js/calculator.js"></script>
+
+</body>
+</html>

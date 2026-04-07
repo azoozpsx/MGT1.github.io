@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<!--
+    ===================================================
+    ملف: index.html
+    الصفحة: الرئيسية (Home Page)
+    الوصف: الصفحة الرئيسية لموقع المشعبة للطاقة الشمسية
+
+    للباك اند:
+    - هذه الصفحة ثابتة بالكامل حالياً
+    - القسم الوحيد الذي يحتاج ربط بالباك اند:
+      * نموذج CTA (البريد الإلكتروني في الأسفل)
+        ← يُرسل إلى: POST /api/newsletter
+
+    الملفات المربوطة:
+    - css/main.css       (أنماط مشتركة)
+    - css/home.css       (أنماط الصفحة الرئيسية)
+    - js/tailwind.config.js (إعدادات الألوان)
+    - js/main.js         (JS مشترك)
+    - js/contact.js      (نموذج CTA)
+    ===================================================
+-->
+<html dir="rtl" lang="ar" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- عنوان الصفحة -->
+    <title>المشعبة لمنظومات الطاقة الشمسية | Radiant Solar - حضرموت، المكلا، اليمن</title>
+
+    <!-- وصف الصفحة لمحركات البحث -->
+    <meta name="description" content="المشعبة لمنظومات الطاقة الشمسية - حلول طاقة شمسية متطورة في اليمن، حضرموت والمكلا. ألواح شمسية، بطاريات، محولات، وحاسبة طاقة ذكية." />
+
+    <!-- للباك اند: أضف CSRF token هنا إذا كنت تستخدم Laravel -->
+    <!-- <meta name="csrf-token" content="{{ csrf_token() }}"> -->
+
+    <!-- ==================== الخطوط ==================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=IBM+Plex+Sans+Arabic:wght@100..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- ==================== Tailwind CSS ==================== -->
+    <!-- يجب تحميل Tailwind Config أولاً قبل Tailwind CDN -->
+    <script src="js/tailwind.config.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- ==================== CSS الخاصة بالموقع ==================== -->
+    <!-- الأنماط المشتركة لجميع الصفحات -->
+    <link rel="stylesheet" href="css/main.css" />
+    <!-- الأنماط الخاصة بالصفحة الرئيسية -->
+    <link rel="stylesheet" href="css/home.css" />
+</head>
+
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+<!-- ==========================================
+     شريط التنقل العلوي (Navbar)
+     للباك اند: روابط التنقل ثابتة حالياً
+                يمكن تفعيل/تعطيل الروابط
+                بناءً على صلاحية المستخدم
+     ========================================== -->
+<nav id="main-navbar"
+     class="glass-nav fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 h-20 max-w-7xl mx-auto rounded-full mt-4 md:mx-8"
+     role="navigation" aria-label="التنقل الرئيسي">
+
+    <!-- الشعار -->
+    <div class="flex items-center gap-8">
+        <a href="index.html"
+           class="text-2xl font-black tracking-tighter text-primary"
+           aria-label="الصفحة الرئيسية - Radiant Solar">
+            Radiant Solar
+        </a>
+
+        <!-- روابط التنقل (سطح المكتب) -->
+        <nav class="hidden md:flex items-center gap-6" aria-label="قائمة رئيسية">
+            <a class="nav-link" href="pages/products.html">المنتجات</a>
+            <a class="nav-link" href="pages/calculator.html">حاسبة الطاقة</a>
+            <a class="nav-link" href="pages/about.html">من نحن</a>
+            <!-- للباك اند: يمكن إضافة رابط "تسجيل الدخول" هنا -->
+        </nav>
+    </div>
+
+    <!-- زر الاستشارة -->
+    <button class="btn-consultation px-6 py-2.5 text-sm"
+            onclick="window.location.href='pages/about.html'"
+            id="consultation-btn">
+        احصل على استشارة
+    </button>
+</nav>
+
+
+<!-- ==========================================
+     قسم البطولة (Hero Section)
+     ========================================== -->
+<header class="hero-section" role="banner">
+    <!-- خلفية أشعة الشمس -->
+    <div class="absolute inset-0 sun-ray-effect -z-10" aria-hidden="true"></div>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+        <!-- النص الرئيسي -->
+        <div class="lg:col-span-7 reveal">
+            <h1 class="hero-title text-on-surface">
+                <span class="text-primary">المشعبة</span> لمنظومات الطاقة الشمسية
+                <br />دقة في كل شعاع
+            </h1>
+            <p class="hero-description">
+                نحن نعيد صياغة مستقبل الطاقة في المملكة العربية السعودية من خلال
+                حلول شمسية متطورة تدمج بين الابتكار التقني والاستدامة البيئية.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <!-- زر رئيسي: يوجه لحاسبة الطاقة -->
+                <a href="pages/calculator.html"
+                   class="btn-primary px-8 py-4 text-lg rounded-xl"
+                   id="hero-calc-btn">
+                    احسب احتياجك من الطاقة
+                </a>
+                <!-- زر ثانوي: يوجه للمنتجات -->
+                <a href="pages/products.html"
+                   class="px-8 py-4 rounded-xl font-bold text-lg bg-surface-container-highest text-on-surface hover:bg-surface-container-high transition-colors"
+                   id="hero-products-btn">
+                    اكتشف منتجاتنا
+                </a>
+            </div>
+        </div>
+
+        <!-- الصورة البطولية -->
+        <div class="lg:col-span-5 relative reveal" style="animation-delay:0.2s">
+            <div class="hero-image-wrapper">
+                <!-- للباك اند: الصورة من خارجي حالياً
+                               يمكن تغييرها لصورة من storage السيرفر -->
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU9iOrzPEIeo7EmUmYP_Ol7nuhIRyIJgDrWvRNtJ-lICEcqpR6T1LvOZ5jPCQkzYMPGC40s69O8bGbAumjsrLGgINy_LU6SjQmH4hI_mR4VZ39O0kpBChWvyAVN3qqcGMloo6pip-IkMEbytLSDKXfEFaea1ivzJNNJT2DZL2OQtgRrOnvojXECUnRDR8NWNHO48xQhWaJU4ElUJ2yYyRu3t-PmePfPtP2mTNnorcxkynD9cS8pIBW3FaTL47T6TZcgO_LXY313Tk"
+                     alt="ألواح شمسية حديثة مثبتة على سقف فيلا بيضاء في المناخ الصحراوي" />
+            </div>
+
+            <!-- بطاقة الكفاءة الزجاجية -->
+            <div class="efficiency-card" aria-label="مؤشر كفاءة النظام">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-primary/10 rounded-full">
+                        <span class="material-symbols-outlined text-primary" aria-hidden="true">bolt</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-secondary font-bold uppercase tracking-wider">الكفاءة الحالية</p>
+                        <!-- للباك اند: هذا الرقم يمكن جلبه من API
+                                        GET /api/stats/efficiency -->
+                        <p class="text-2xl font-bold text-on-surface">98.4%</p>
+                    </div>
+                </div>
+                <div class="efficiency-bar">
+                    <div class="efficiency-bar-fill" style="width: 98%" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</header>
+
+
+<!-- ==========================================
+     قسم المزايا (Benefits Section - Bento Grid)
+     ========================================== -->
+<section class="benefits-section" aria-labelledby="benefits-heading">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div class="reveal">
+                <h2 id="benefits-heading" class="text-4xl font-bold mb-4">لماذا المشعبة؟</h2>
+                <p class="text-secondary max-w-md">
+                    نحن نجمع بين الأداء العالي والتصميم العصري لتوفير تجربة طاقة لا مثيل لها.
+                </p>
+            </div>
+            <span class="material-symbols-outlined text-7xl text-primary/10 reveal" aria-hidden="true">wb_sunny</span>
+        </div>
+
+        <!-- شبكة بينتو للمزايا -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+            <!-- ميزة 1: الاستدامة (بطاقة كبيرة) -->
+            <div class="benefit-card-large md:col-span-2 group reveal">
+                <div class="benefit-icon-wrapper bg-primary/5">
+                    <span class="material-symbols-outlined text-4xl text-primary" aria-hidden="true">energy_savings_leaf</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-3">استدامة حقيقية</h3>
+                    <p class="text-secondary leading-relaxed">
+                        نقلل من بصمتك الكربونية بينما نزيد من قيمة عقارك
+                        من خلال تقنيات نظيفة تماماً تتوافق مع رؤية 2030.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ميزة 2: الضمان -->
+            <div class="benefit-card group reveal" style="animation-delay:0.1s">
+                <div class="benefit-icon-wrapper bg-tertiary/5">
+                    <span class="material-symbols-outlined text-4xl text-tertiary" aria-hidden="true">verified_user</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-3">ضمان ممتد</h3>
+                    <p class="text-secondary leading-relaxed">25 عاماً من الأداء المضمون على جميع أنظمتنا.</p>
+                </div>
+            </div>
+
+            <!-- ميزة 3: دقة التنفيذ -->
+            <div class="benefit-card group reveal" style="animation-delay:0.2s">
+                <div class="benefit-icon-wrapper bg-primary/5">
+                    <span class="material-symbols-outlined text-4xl text-primary" aria-hidden="true">precision_manufacturing</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-3">دقة التنفيذ</h3>
+                    <p class="text-secondary leading-relaxed">مهندسون مختصون يتابعون كل مرحلة من مراحل التنفيذ.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ==========================================
+     قسم عرض المنتجات (Product Showcase)
+     للباك اند: يمكن جلب المنتجات ديناميكياً من:
+                GET /api/products?featured=true&limit=3
+     ========================================== -->
+<section class="products-showcase-section" aria-labelledby="products-heading">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="text-center mb-16 reveal">
+            <span class="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">نظامنا المتكامل</span>
+            <h2 id="products-heading" class="text-5xl font-bold">تقنياتنا المتكاملة</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <!-- منتج 1: الألواح الشمسية -->
+            <article class="product-card reveal group" aria-label="ألواح كواترو برو">
+                <div class="product-card-image">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDB3ZgpP_-iQ5WDnMbX0uGCecMIM0Voirsr_PDsjXZxXP2LMLynX9CmpDhB2Y8leLqOQGE_skHRSKmfAaF9IRC5fe_cjZn3HOQyoQHv7zL9HyvqTQBMYMqJIvTtFeKeD0KEcUBSTs0vB_PXMit7TvKnT6S4LePWH8CoaayUs91UluQKSdQGQ6ufTWiGlNfZSXYJeeEFCppl7FZq3HhXMzGeW0BcpMpp3TW3k7uRq7n_yGZ2sLWBUdxCWeoJGbo0DgZ-M5TtIHjhsws"
+                         alt="ألواح شمسية ثنائية الوجه عالية الكفاءة" />
+                </div>
+                <div class="product-card-body">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-2xl font-bold">ألواح كواترو برو</h3>
+                        <!-- للباك اند: شارة "جديد" يمكن التحكم بها من لوحة التحكم -->
+                        <span class="badge badge-primary">جديد</span>
+                    </div>
+                    <p class="text-secondary mb-6 leading-relaxed">
+                        تكنولوجيا ثنائية الوجه لامتصاص أشعة الشمس المنعكسة من الرمال.
+                    </p>
+                    <!-- للباك اند: رابط صفحة المنتج يحمل id المنتج
+                                     href="/products/{product_id}" -->
+                    <button class="product-explore-btn"
+                            onclick="window.location.href='pages/products.html'"
+                            id="explore-panels-btn">
+                        استكشف المواصفات
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    </button>
+                </div>
+            </article>
+
+            <!-- منتج 2: البطاريات -->
+            <article class="product-card reveal group" style="animation-delay:0.1s" aria-label="بطاريات سديم">
+                <div class="product-card-image">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiUGx5msHzzD9_uEYYf3A9mIhzGOMrfno770nBARsBEu3o8PprI0w6ID-4R9giuuJYJcshvE14j0I-hVC9b20K3bC4uGebpMZayllnAFRX9C8n9zZrGtScrnblSsIH2HYXUhP3xI0wDyK7ATUpYSqeo_9LPHs4SBJf6BFSRBrVpfsxu0TMm_t0t1T9qickBE06XI-rxmGZ9M5ArHl27zUoFyDhkQHabGj4sIWqCPhh"
+                         alt="وحدة تخزين طاقة ذكية مثبتة على الجدار" />
+                </div>
+                <div class="product-card-body">
+                    <h3 class="text-2xl font-bold mb-4">بطاريات سديم</h3>
+                    <p class="text-secondary mb-6 leading-relaxed">
+                        تخزين طاقة ذكي يدعم استهلاكك الليلي بكفاءة تتجاوز 96%.
+                    </p>
+                    <button class="product-explore-btn"
+                            onclick="window.location.href='pages/products.html'"
+                            id="explore-batteries-btn">
+                        استكشف المواصفات
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    </button>
+                </div>
+            </article>
+
+            <!-- منتج 3: المحولات -->
+            <article class="product-card reveal group" style="animation-delay:0.2s" aria-label="محولات أوبتيما">
+                <div class="product-card-image">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnKmUvxibJaxekEppme_c1mNi3SkqmF6jShHnFk0bDbaxDJ2ypepzBne3mfBcoOBO9qgYnR1gkKtkhjyxyP0Slmj_dNA8uRKO6Vt4SM6xyvOWcVyxSHaEOZdHD4ot--CY1VfskgT2h5459MtwcISE7jxUgHObYNV8dzvTvNcffXaM5nprZ5DbB8XumOP1t7rtZR0RVxc8NmjvbcynR2rVspLAOIb8syk973SjOn9hVXIvqgj2HOWixmZtfGfAobbrE3CSbhPSe0bU"
+                         alt="نظام إدارة طاقة ذكي يعرض إحصائيات الإنتاج" />
+                </div>
+                <div class="product-card-body">
+                    <h3 class="text-2xl font-bold mb-4">محولات أوبتيما</h3>
+                    <p class="text-secondary mb-6 leading-relaxed">
+                        تحويل طاقة فائق السرعة مع نظام تبريد متطور مخصص لمناخ الخليج.
+                    </p>
+                    <button class="product-explore-btn"
+                            onclick="window.location.href='pages/products.html'"
+                            id="explore-inverters-btn">
+                        استكشف المواصفات
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    </button>
+                </div>
+            </article>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ==========================================
+     قسم دعوة للحاسبة (Calculator CTA)
+     للباك اند: نموذج البريد الإلكتروني هنا
+                يُرسل إلى: POST /api/newsletter
+                الحقل: { email: "..." }
+     ========================================== -->
+<section class="calculator-cta-section" aria-labelledby="cta-heading">
+    <div class="max-w-7xl mx-auto">
+        <div class="calculator-cta-box">
+
+            <!-- المحتوى النصي -->
+            <div class="calculator-cta-content reveal">
+                <h2 id="cta-heading" class="text-4xl md:text-5xl font-bold mb-8 leading-tight">
+                    ابدأ رحلة توفير الطاقة اليوم
+                </h2>
+                <p class="text-xl mb-12 opacity-90 max-w-lg leading-relaxed">
+                    استخدم حاسبتنا المتقدمة لتقدير حجم النظام المناسب لمنزلك
+                    وتوقع مبالغ التوفير في فواتيرك القادمة.
+                </p>
+
+                <!-- نموذج البريد الإلكتروني -->
+                <form id="cta-email-form"
+                      class="flex flex-col sm:flex-row gap-4"
+                      novalidate
+                      aria-label="نموذج بدء الحساب">
+                    <!-- للباك اند: البريد الإلكتروني يُرسل للسيرفر عند الإرسال -->
+                    <input type="email"
+                           id="cta-email-input"
+                           name="email"
+                           class="cta-email-input text-sm"
+                           placeholder="أدخل بريدك الإلكتروني"
+                           autocomplete="email"
+                           dir="ltr"
+                           aria-label="البريد الإلكتروني" />
+                    <button type="submit"
+                            class="cta-submit-btn"
+                            id="cta-submit-btn">
+                        ابدأ الحساب المجاني
+                    </button>
+                </form>
+            </div>
+
+            <!-- الصورة (عنصر زخرفي) -->
+            <div class="calculator-cta-image" aria-hidden="true">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-60ItFHW8IJahtm3fVHvfTf4WRyiWk77lQ4OLcyCH-IBNo_FRy3Lb1P1HOkcgJPUa7GNgKFABUSXjyM52UdIZGZ45wLW0ooXlgo7hu4ejyfF0DqFnebBAAiHhyI1wuqE4c4dvtcHpOtDYQOVv7BKHWzZ7ItgbjEjw5kekk5us9ZPM7OeOAo0nIAN4lQscKIYdWFRBiQynMgekx5k-rktK1b3XYgXBBalAd97WYE7qqZf16rnp-Xiehlw9P7TAbHbatwzlIFK-das"
+                     alt="" />
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ==========================================
+     الفوتر (Footer)
+     للباك اند: روابط الفوتر ثابتة
+                يمكن جلبها من: GET /api/settings
+     ========================================== -->
+<footer class="site-footer" role="contentinfo">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+
+        <!-- الشعار وحقوق الملكية -->
+        <div class="flex flex-col gap-2 items-center md:items-start">
+            <span class="text-xl font-bold text-slate-900">المشعبة لمنظومات الطاقة الشمسية</span>
+            <!-- للباك اند: السنة يمكن توليدها ديناميكياً -->
+            <p class="text-slate-500 text-sm">© 2024 المشعبة - اليمن، حضرموت، المكلا. دقة في كل شعاع.</p>
+        </div>
+
+        <!-- روابط الفوتر -->
+        <nav class="flex gap-8" aria-label="روابط ثانوية">
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors font-medium">الخصوصية</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors font-medium">الشروط</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors font-medium">الاستدامة</a>
+        </nav>
+
+        <!-- أيقونات التواصل الاجتماعي -->
+        <!-- للباك اند: الروابط يمكن جلبها من: GET /api/settings/social_links -->
+        <div class="flex gap-4" aria-label="وسائل التواصل الاجتماعي">
+            <a href="#" class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors" aria-label="مشاركة">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">share</span>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors" aria-label="اللغة">
+                <span class="material-symbols-outlined text-sm" aria-hidden="true">language</span>
+            </a>
+        </div>
+
+    </div>
+</footer>
+
+
+<!-- ==================== JavaScript ==================== -->
+<!-- يجب تحميل main.js في نهاية body لتحسين الأداء -->
+<script src="js/main.js"></script>
+<script src="js/contact.js"></script>
+
+</body>
+</html>

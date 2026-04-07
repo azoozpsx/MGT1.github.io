@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<!--
+    ===================================================
+    ملف: pages/about.html
+    الصفحة: من نحن (About Us)
+
+    للباك اند:
+    - هذه الصفحة تحتوي على نموذج تواصل حقيقي
+    - نقاط API المطلوبة:
+      ┌──────────────────────────────────────────┐
+      │ GET  /api/team                            │
+      │   ← بيانات الفريق                        │
+      │   الاستجابة: [{id, name, role, photo}]   │
+      │                                           │
+      │ GET  /api/testimonials                    │
+      │   ← شهادات العملاء                       │
+      │   الاستجابة: [{quote, author, company}]  │
+      │                                           │
+      │ POST /api/contact                         │
+      │   ← إرسال نموذج التواصل                  │
+      │   البيانات: {name, email,                 │
+      │              project_type, message}       │
+      │   الاستجابة: {success: bool, message}    │
+      └──────────────────────────────────────────┘
+
+    ملاحظة للباك اند:
+    - قسم التواصل يحمل id="contact" للتنقل الداخلي
+    - النموذج يُضاف إليه id="contact-form" للـ JS
+    ===================================================
+-->
+<html dir="rtl" lang="ar" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>من نحن | المشعبة لمنظومات الطاقة الشمسية - حضرموت، اليمن</title>
+    <meta name="description" content="تعرف على المشعبة للطاقة الشمسية - قصتنا، قيمنا، وفريق خبرائنا المكرس لتحويل أشعة شمس المملكة إلى طاقة نظيفة ومستدامة." />
+
+    <!-- للباك اند: <meta name="csrf-token" content="{{ csrf_token() }}"> -->
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=IBM+Plex+Sans+Arabic:wght@100..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="../js/tailwind.config.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/about.css" />
+</head>
+
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- ==========================================
+     شريط التنقل
+     (من نحن رابط نشط)
+     ========================================== -->
+<nav id="main-navbar"
+     class="glass-nav fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 md:px-8 h-20 max-w-7xl mx-auto rounded-full mt-4"
+     role="navigation" aria-label="التنقل الرئيسي">
+
+    <a class="text-2xl font-black tracking-tighter text-primary font-headline"
+       href="../index.html"
+       aria-label="الرئيسية - Radiant Solar">
+        Radiant Solar
+    </a>
+
+    <div class="hidden md:flex items-center gap-8">
+        <a class="nav-link" href="products.html">المنتجات</a>
+        <a class="nav-link" href="calculator.html">حاسبة الطاقة</a>
+        <!-- من نحن نشطة في هذه الصفحة -->
+        <a class="nav-link active" href="about.html" aria-current="page">من نحن</a>
+    </div>
+
+    <button class="btn-consultation px-6 py-2.5 text-sm"
+            onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})"
+            id="consultation-btn">
+        احصل على استشارة
+    </button>
+</nav>
+
+
+<!-- ==========================================
+     المحتوى الرئيسي
+     ========================================== -->
+<main class="pt-32">
+
+    <!-- ==========================================
+         1. قسم البطولة والقصة
+         ========================================== -->
+    <section class="about-hero-section reveal" aria-labelledby="about-hero-title">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+            <!-- النص -->
+            <div class="lg:col-span-7 space-y-8">
+                <span class="about-badge">تراثنا ومستقبلنا</span>
+                <h1 id="about-hero-title" class="about-hero-title">
+                    نشرق بابتكارنا لنضيء
+                    <span class="text-primary">مستقبل حضرموت واليمن</span>
+                </h1>
+                <p class="text-lg text-secondary leading-relaxed max-w-2xl">
+                    في "المشعبة للطاقة الشمسية"، نحن لا نركب الألواح فحسب؛ نحن نبني جسراً
+                    بين شمس الصحراء العريقة وتقنيات الغد المتطورة. بدأت رحلتنا من شغفنا
+                    بالاستدامة تماشياً مع رؤية المملكة 2030.
+                </p>
+            </div>
+
+            <!-- الصورة + بطاقة الإحصائية -->
+            <div class="lg:col-span-5 relative reveal" style="animation-delay:0.2s">
+                <!-- للباك اند: صورة يمكن جلبها من: GET /api/settings/about_image -->
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFiA_7mdZ0RQAbAxffR0lOMriVVIdRe7-d2sBSuJonxku11Y3bStO-MQyojIs70KDOWwUyr8jf5VKZP1UDGZRwKRfzStAdu3eyVbu0Z_3BomEskokhj7_cA7jKvWxDm2peZZY1AG3zWiGVkr_G0WOvXH9VcB4Oq_XiDNt1NPBXtXJvLZDe_xiHjKY0W--fqEAbuQ7XME43EI42dmzCm8932HLjzwkch5NwbHl0sPz19eSbDISduhgv1SMZwAmZmgKvPwvnK5rT6po"
+                     alt="ألواح شمسية تعكس شروق الشمس الذهبي في الصحراء السعودية"
+                     class="about-hero-image" />
+
+                <!-- بطاقة إحصائية -->
+                <!-- للباك اند: الرقم من GET /api/stats/projects_count -->
+                <div class="about-stat-card" aria-label="عدد المشاريع المنجزة">
+                    <div class="about-stat-number">+150</div>
+                    <div class="text-sm text-secondary font-medium mt-1">مشروع منجز في 2023</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+         2. قسم القيم الجوهرية
+         ========================================== -->
+    <section class="values-section" aria-labelledby="values-heading">
+        <div class="max-w-7xl mx-auto">
+
+            <div class="text-center mb-20 reveal">
+                <h2 id="values-heading" class="text-4xl font-bold">قيمنا الجوهرية</h2>
+                <div class="section-title-divider" aria-hidden="true"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- قيمة 1: الدقة التقنية -->
+                <div class="value-card hover:shadow-2xl reveal">
+                    <div class="value-icon-wrapper bg-primary-container/10 text-primary">
+                        <span class="material-symbols-outlined text-4xl" aria-hidden="true">precision_manufacturing</span>
+                    </div>
+                    <h3 class="text-2xl font-bold">الدقة التقنية</h3>
+                    <p class="text-secondary leading-relaxed">
+                        نلتزم بأعلى معايير الجودة العالمية في التصميم والتركيب
+                        لضمان كفاءة قصوى تدوم لأجيال.
+                    </p>
+                </div>
+
+                <!-- قيمة 2: الاستدامة (مميزة بالأحمر) -->
+                <div class="value-card-featured reveal" style="animation-delay:0.1s">
+                    <div class="value-icon-wrapper">
+                        <span class="material-symbols-outlined text-4xl" aria-hidden="true">eco</span>
+                    </div>
+                    <h3 class="text-2xl font-bold">الاستدامة الحقيقية</h3>
+                    <p class="opacity-90 leading-relaxed">
+                        نحن نؤمن بأن الطاقة النظيفة هي حق للجميع، ونسعى لجعلها
+                        واقعاً ملموساً في كل منزل ومنشأة سعودية.
+                    </p>
+                </div>
+
+                <!-- قيمة 3: الشراكة -->
+                <div class="value-card hover:shadow-2xl reveal" style="animation-delay:0.2s">
+                    <div class="value-icon-wrapper bg-tertiary/10 text-tertiary">
+                        <span class="material-symbols-outlined text-4xl" aria-hidden="true">handshake</span>
+                    </div>
+                    <h3 class="text-2xl font-bold">الشراكة والنزاهة</h3>
+                    <p class="text-secondary leading-relaxed">
+                        علاقتنا بعملائنا تبدأ بعد التركيب. نحن شركاؤكم في
+                        رحلة توفير الطاقة لسنوات طويلة.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+         3. قسم الفريق
+         للباك اند: بيانات الفريق من GET /api/team
+                    الحقول: id, name, role, photo_url
+         ========================================== -->
+    <section class="team-section" aria-labelledby="team-heading">
+
+        <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div class="space-y-4 reveal">
+                <h2 id="team-heading" class="text-4xl font-bold">فريق الخبراء</h2>
+                <p class="text-secondary max-w-xl text-lg">
+                    نخبة من المهندسين والمستشارين المكرسين لتحويل أشعة الشمس
+                    إلى قوة دافعة لأعمالكم.
+                </p>
+            </div>
+            <!-- للباك اند: رابط صفحة "الوظائف" أو نموذج التقديم -->
+            <a href="#contact"
+               class="join-team-btn reveal"
+               style="animation-delay:0.1s">
+                <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                انضم إلينا
+            </a>
+        </div>
+
+        <!-- شبكة أعضاء الفريق -->
+        <!--
+            للباك اند: هذه البطاقات ثابتة حالياً
+                       لجعلها ديناميكية، استبدل بـ:
+                       GET /api/team → render بـ JavaScript
+        -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            <!-- عضو 1: المؤسس -->
+            <article class="team-member-card reveal" aria-label="م. فيصل العتيبي - المؤسس والمدير التنفيذي">
+                <div class="team-member-image-wrapper">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsqXTXv0jI-veu_7hb60LKrMAMP2KNX7YpRUuHw12QW8wsllOOjO2ZpB4TS0-sxwlRDJOZaK2yqtUtHV4NEzx_5tnk2zMvs1rm2Gc96QXZ_yVxFofAtygiaZcY_8XFjzZQ-Uaq2V4Lzefrt_ZRE_T69TFNeRJ5Q01anJFpv3g3DgpL5Tgig3ENUCOrTAl4F6ErRGWLuFmov8Ol4lMQpMvnXyiFjE7XtjP_RT7nWVl6pF0SnBKz5GeIY-9cMRx-TmIo3k7Lu9Uv8GA"
+                         alt="صورة م. فيصل العتيبي" />
+                </div>
+                <h4 class="team-member-name">م. فيصل العتيبي</h4>
+                <p class="team-member-role">المؤسس والمدير التنفيذي</p>
+            </article>
+
+            <!-- عضو 2: رئيسة الهندسة -->
+            <article class="team-member-card reveal" style="animation-delay:0.1s" aria-label="م. سارة القحطاني - رئيسة قسم الهندسة">
+                <div class="team-member-image-wrapper">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsqN5tzoBeQHTklTjefvkrpp-26Vj-vPr6tNfxg99VbcWjCJetHVS3HQrT5bu7hV4wROo3adbb1F13G_t4871vXf24b9Dw46IxO6wPNiLOntT12HTLjEcU8_WsZsCeA2aqOaONTkIfCat6egGeCQSkWlJnYDjG3uD3J8k4AKQxh6xLiOKgQ54-R0LstJRCnucagm1JB9W5agxn-aRTWZj51QVaNoojC8l-xQVv8kKWYvh0gSpVQvvjkONMk-uZf_qR1E7LRu24uoM"
+                         alt="صورة م. سارة القحطاني" />
+                </div>
+                <h4 class="team-member-name">م. سارة القحطاني</h4>
+                <p class="team-member-role">رئيسة قسم الهندسة</p>
+            </article>
+
+            <!-- عضو 3: مدير العمليات -->
+            <article class="team-member-card reveal" style="animation-delay:0.2s" aria-label="خالد بن محمد - مدير العمليات">
+                <div class="team-member-image-wrapper">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTtgiwZs5l3Uu5bgH13ntY-lGgcS6sArdbQ7qLdpb_KOOklwhh23nZMqKGg0oWHJTeO3vi8GgwtjeIROOwT1_9Zvz7-dkgszPe6yK6XHmSoth_O_iQXsKqFAhNGMJKNsCUQMOI0KAjfGdACuRs1dJegwGqrP7oEb8qXu30wGBoHB3U4-BudWlW5avxiuCjJrkiW_3rqXasswlTSzmXaGlZXmDdDW1D8Jk6DF1dJCGkYAxUy84CTZHaTYpkngCRnyuJNIluZfWxuRc"
+                         alt="صورة خالد بن محمد" />
+                </div>
+                <h4 class="team-member-name">خالد بن محمد</h4>
+                <p class="team-member-role">مدير العمليات</p>
+            </article>
+
+            <!-- عضو 4: علاقات المستثمرين -->
+            <article class="team-member-card reveal" style="animation-delay:0.3s" aria-label="نورة السديري - علاقات المستثمرين">
+                <div class="team-member-image-wrapper">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaYe-GDcIgWNtrynsSq_eid1RiINfZ1FhWI0Wc3R3AqEqkIRkBLjmD9duSoQFD7sZs3WcvvqjWQRM7KA-tlTZEQiRe8XF4XpXcx3w7bfmZYzdrx-wiXRe_5t4-kWXZOV-jr0iALEipLYWBZDzurD8CMl6j_cMDU1IDdM-BCg9Lzzxf25CVcA7NzdT4GfnRaHFf2SmguwlNxWDqsvs7POlR9Rj3Qx1gI_cOLe8j71BpL0notVpt30vnIvcaqd6KXuG59hE3C6M-Jl0"
+                         alt="صورة نورة السديري" />
+                </div>
+                <h4 class="team-member-name">نورة السديري</h4>
+                <p class="team-member-role">علاقات المستثمرين</p>
+            </article>
+
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+         4. قسم شهادات العملاء
+         للباك اند: الشهادات من GET /api/testimonials
+         ========================================== -->
+    <section class="testimonials-section" aria-labelledby="testimonials-heading">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            <!-- النص التعريفي -->
+            <div class="space-y-6 reveal">
+                <span class="testimonials-heading">ماذا يقول عملاؤنا</span>
+                <h2 id="testimonials-heading" class="text-4xl md:text-5xl font-bold leading-tight">
+                    ثقة تضيء دروبنا
+                </h2>
+                <p class="opacity-80 text-lg leading-relaxed">
+                    نفخر بكوننا الخيار الأول للمصانع والمنازل التي تبحث عن
+                    الاستدامة والجودة في المملكة.
+                </p>
+            </div>
+
+            <!-- بطاقة الاقتباس -->
+            <!-- للباك اند: محتوى الاقتباس يأتي من GET /api/testimonials -->
+            <div class="relative reveal" style="animation-delay:0.2s">
+                <div class="testimonial-quote-card">
+                    <span class="testimonial-quote-icon material-symbols-outlined" aria-hidden="true">format_quote</span>
+
+                    <blockquote class="testimonial-quote-text">
+                        "غيرت المشعبة تجربتنا تماماً مع الطاقة. انخفضت تكاليف الكهرباء
+                        بنسبة ٦٥٪ في مصنعنا خلال أول ٦ أشهر. الاحترافية في التركيب
+                        والمتابعة كانت مذهلة."
+                    </blockquote>
+
+                    <div class="flex items-center gap-4">
+                        <!-- للباك اند: صورة صاحب الاقتباس يمكن إضافتها هنا -->
+                        <div class="testimonial-author-avatar" aria-hidden="true"></div>
+                        <div>
+                            <cite class="font-bold not-italic">أ. عبدالعزيز الحربي</cite>
+                            <p class="text-sm text-secondary">مدير عام شركة نسيج</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card-shadow" aria-hidden="true"></div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ==========================================
+         5. قسم التواصل ونموذج الاتصال
+         id="contact" للتنقل الداخلي من أزرار الموقع
+         للباك اند: النموذج يُرسل إلى POST /api/contact
+         ========================================== -->
+    <section class="contact-section" id="contact" aria-labelledby="contact-heading">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+                <!-- نموذج التواصل -->
+                <div class="lg:col-span-7 contact-form-card reveal">
+                    <h2 id="contact-heading" class="contact-form-title">
+                        دعنا نتحدث عن مشروعك القادم
+                    </h2>
+
+                    <!--
+                        للباك اند:
+                        النموذج يُعالج بـ contact.js
+                        البيانات تُرسل إلى: POST /api/contact
+                        راجع ملف: js/contact.js
+                    -->
+                    <form id="contact-form" class="space-y-6" novalidate aria-label="نموذج التواصل">
+
+                        <!-- صف الاسم والبريد -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- حقل الاسم -->
+                            <div class="form-field-group">
+                                <label class="form-label" for="contact-name">الاسم بالكامل</label>
+                                <input type="text"
+                                       id="contact-name"
+                                       name="name"
+                                       class="form-input"
+                                       placeholder="أدخل اسمك"
+                                       autocomplete="name"
+                                       required
+                                       aria-required="true"
+                                       aria-describedby="error-name" />
+                                <!-- رسالة خطأ الاسم -->
+                                <span id="error-name" class="error-message" role="alert"></span>
+                            </div>
+
+                            <!-- حقل البريد الإلكتروني -->
+                            <div class="form-field-group">
+                                <label class="form-label" for="contact-email">البريد الإلكتروني</label>
+                                <input type="email"
+                                       id="contact-email"
+                                       name="email"
+                                       class="form-input"
+                                       placeholder="email@example.com"
+                                       autocomplete="email"
+                                       dir="ltr"
+                                       required
+                                       aria-required="true"
+                                       aria-describedby="error-email" />
+                                <span id="error-email" class="error-message" role="alert"></span>
+                            </div>
+                        </div>
+
+                        <!-- نوع المشروع -->
+                        <div class="form-field-group">
+                            <label class="form-label" for="contact-project-type">نوع المشروع</label>
+                            <!--
+                                للباك اند: الخيارات يمكن جلبها ديناميكياً
+                                           GET /api/project-types
+                            -->
+                            <select id="contact-project-type"
+                                    name="project_type"
+                                    class="form-select"
+                                    aria-required="true">
+                                <option value="residential">سكني</option>
+                                <option value="commercial">تجاري</option>
+                                <option value="industrial">صناعي</option>
+                                <option value="agricultural">زراعي</option>
+                            </select>
+                        </div>
+
+                        <!-- الرسالة -->
+                        <div class="form-field-group">
+                            <label class="form-label" for="contact-message">رسالتك</label>
+                            <textarea id="contact-message"
+                                      name="message"
+                                      class="form-input form-textarea"
+                                      placeholder="كيف يمكننا مساعدتك؟"
+                                      rows="4"
+                                      required
+                                      aria-required="true"
+                                      aria-describedby="error-message"></textarea>
+                            <span id="error-message" class="error-message" role="alert"></span>
+                        </div>
+
+                        <!-- زر الإرسال -->
+                        <button type="submit"
+                                class="form-submit-btn"
+                                id="contact-submit-btn">
+                            إرسال الطلب
+                        </button>
+
+                        <!-- رسالة نجاح الإرسال -->
+                        <div id="contact-success-msg"
+                             class="success-message"
+                             role="status"
+                             aria-live="polite">
+                            ✅ تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.
+                        </div>
+
+                        <!-- رسالة خطأ الشبكة -->
+                        <div id="contact-network-error"
+                             class="error-message text-center"
+                             role="alert"
+                             aria-live="polite">
+                            ❌ حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.
+                        </div>
+                    </form>
+                </div>
+
+
+                <!-- الخريطة ومعلومات التواصل -->
+                <div class="lg:col-span-5 space-y-8 reveal" style="animation-delay:0.2s">
+
+                    <!-- الخريطة -->
+                    <!--
+                        للباك اند: استبدل الصورة بـ Google Maps Embed:
+                        <iframe src="https://www.google.com/maps/embed?pb=..." ...></iframe>
+                        يجب تفعيل Google Maps Embed API من Google Console
+                    -->
+                    <div class="map-card" aria-label="موقع مقر الشركة">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAibz86I82KBLA1JVIB8Iu6tQ4xE76xGCW2-ZWfCaPtOf_KKmNw0mlcqUBnNPdNOSAzvIgCqR9bCVn7lKFeLA9ajs1CPrrEjdT6bheGmLXN9xpTBCT-RbJ6bWtW2SXG9SUr5hubvDJc4Blj0wODTZSFfvN4hwsBcS8jdg6sXk0aalZImKxiwZWO1kkEepeBLg1KkZfzm_1x39yxNK-hfbZWH3BHzWgT41vaeCNr3lKTvT18VjKWfwsCikdSq16iONvAYv4-pY-SEU"
+                             alt="خريطة موقع مقر الشركة الرئيسي في الرياض" />
+                        <div class="map-overlay" aria-hidden="true"></div>
+
+                        <!-- بطاقة العنوان -->
+                        <div class="map-address-card">
+                            <div class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-primary" aria-hidden="true">location_on</span>
+                                <div>
+                                    <p class="font-bold">المقر الرئيسي - الرياض</p>
+                                    <p class="text-sm text-secondary">طريق الملك فهد، حي المروج</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- معلومات التواصل -->
+                    <div class="grid grid-cols-1 gap-4">
+
+                        <!-- رقم الهاتف -->
+                        <!-- للباك اند: من GET /api/settings/contact_info -->
+                        <div class="contact-info-card">
+                            <div class="contact-info-icon">
+                                <span class="material-symbols-outlined" aria-hidden="true">call</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary font-bold">للمبيعات</p>
+                                <a href="tel:+966110000000"
+                                   class="font-headline font-bold text-lg text-on-surface hover:text-primary transition-colors"
+                                   dir="ltr">
+                                    +966 11 000 0000
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- البريد الإلكتروني -->
+                        <div class="contact-info-card">
+                            <div class="contact-info-icon">
+                                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary font-bold">الدعم الفني</p>
+                                <a href="mailto:support@radiantsolar.sa"
+                                   class="font-headline font-bold text-lg text-on-surface hover:text-primary transition-colors"
+                                   dir="ltr">
+                                    support@radiantsolar.sa
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+
+<!-- ==========================================
+     الفوتر
+     ========================================== -->
+<footer class="site-footer" role="contentinfo">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="text-xl font-bold text-slate-900">Radiant Solar</div>
+        <nav class="flex gap-8" aria-label="روابط ثانوية">
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors opacity-80 hover:opacity-100">الخصوصية</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors opacity-80 hover:opacity-100">الشروط</a>
+            <a href="#" class="text-slate-500 hover:text-primary transition-colors opacity-80 hover:opacity-100">الاستدامة</a>
+        </nav>
+        <div class="text-slate-500 text-sm">© 2024 Radiant Solar. دقة في كل شعاع.</div>
+    </div>
+</footer>
+
+
+<!-- JavaScript -->
+<script src="../js/main.js"></script>
+<!-- نموذج التواصل - الملف الرئيسي لهذه الصفحة -->
+<script src="../js/contact.js"></script>
+
+</body>
+</html>
